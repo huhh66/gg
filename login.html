@@ -1,0 +1,19 @@
+<input id="hf" type="tel" placeholder="请输入你的用户名">
+<br>
+<input id="pwd" type="tel" placeholder="请输入您的密码">
+<br>
+<Button onclick="check()">注册</Button>
+<script>
+    function check(){
+        let hf = document.getElementById("hf").value.trim();
+        let pwd = document.getElementById("pwd").value.trim();
+        if (hf === '' || pwd === ''){
+            alert('输入框不能为空');
+            return;
+        }
+
+    alert('注册成功');
+    location.href = "ok.html";
+    }
+</script>
+
