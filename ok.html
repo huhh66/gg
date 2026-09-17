@@ -1,1 +1,17 @@
-<h1>正在开发中,请稍后，谢谢</h1>
+<h1>正在开发中,请稍后,谢谢</h1>
+<button onclick="playVideo()">点击播放视频</button>
+<video id="myVideo" style="display:none" controls>
+<source src="doubao.mp4" type="video/mp4">
+</video>
+<script>
+const v=document.getElementById('myVideo');
+function playVideo(){
+  v.style.display='block';
+  this.style.display='none';
+  v.play();
+}
+v.onended=()=>{
+  v.style.display='none';
+  document.querySelector('button').style.display='block';
+}
+</script>
