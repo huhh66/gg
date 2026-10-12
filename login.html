@@ -1,8 +1,66 @@
-<input id="hf" type="tel" placeholder="请输入你的用户名">
-<br>
-<input id="pwd" type="tel" placeholder="请输入您的密码">
-<br>
-<Button onclick="check()">注册</Button>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>注册页面</title>
+</head>
+<body style="
+  background:#ffffff;
+  margin:0;
+  width:100vw;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+">
+
+  <!-- 竖版长方形卡片，高度降低，四角圆角 -->
+  <div style="
+    background:#ffffff;
+    width:360px;
+    height:360px;
+    border-radius:24px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.08);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:18px;">
+
+    <h2 style="color:#008822; margin:0; font-size:22px;">欢迎注册</h2>
+
+    <input id="hf" type="tel" placeholder="请输入你的用户名" style="
+      width:280px;
+      padding:10px 18px;
+      border:1px solid #d9d9d9;
+      border-radius:999px;
+      outline:none;
+      font-size:15px;
+      background:#f7f7f7;">
+
+    <input id="pwd" type="tel" placeholder="请输入您的密码" style="
+      width:280px;
+      padding:10px 18px;
+      border:1px solid #d9d9d9;
+      border-radius:999px;
+      outline:none;
+      font-size:15px;
+      background:#f7f7f7;">
+
+    <button onclick="check()" style="
+      padding:9px 32px;
+      border:none;
+      border-radius:999px;
+      background:#008822;
+      color:white;
+      font-size:15px;
+      cursor:pointer;
+      box-shadow:0 6px 14px rgba(0,136,34,0.25);">
+      注册
+    </button>
+  </div>
+
 <script>
     function check(){
         let hf = document.getElementById("hf").value.trim();
@@ -11,9 +69,10 @@
             alert('输入框不能为空');
             return;
         }
-
-    alert('注册成功');
-    location.href = "ok.html";
+        alert('注册成功');
+        location.href = "ok.html";
     }
 </script>
 
+</body>
+</html>
