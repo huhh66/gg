@@ -17,9 +17,7 @@ v.onended=()=>{
   document.querySelector('button').style.display='block';
 }
 
-// 打开AI界面弹窗
 function openAiPage(){
-  // 创建弹窗容器
   const aiModal = document.createElement('div');
   aiModal.style = `
     position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);
@@ -27,19 +25,16 @@ function openAiPage(){
   `;
   aiModal.id = "aiModal";
 
-  // AI内容面板
   const aiPanel = document.createElement('div');
   aiPanel.style = `
     width:700px;height:500px;background:#fff;padding:15px;box-sizing:border-box;
     display:flex;flex-direction:column;font-family:SimHei, sans-serif;
   `;
 
-  // 聊天文本框
   const chatBox = document.createElement('textarea');
   chatBox.style = `flex:1;font-size:11px;margin-bottom:10px;resize:none;`;
   chatBox.readOnly = true;
 
-  // 底部输入栏容器
   const bottomBar = document.createElement('div');
   bottomBar.style = `display:flex;gap:10px;`;
 
@@ -49,21 +44,17 @@ function openAiPage(){
   const sendBtn = document.createElement('button');
   sendBtn.innerText = "发送";
 
-  // 退出按钮
   const exitBtn = document.createElement('button');
   exitBtn.innerText = "退出";
   exitBtn.onclick = function(){
     aiModal.remove();
   }
 
-  // 发送消息函数
   sendBtn.onclick = async function(){
     const msg = inputBox.value.trim();
     if(!msg) return;
     chatBox.value += `你：${msg}\n`;
     inputBox.value = "";
-
-    // 内置固定回答逻辑，对应你python里的规则
     let reply;
     if(msg === '你是谁' || msg === '你是谁呀'){
       reply = '我是jakerste团队制作的强大AI';
@@ -72,8 +63,22 @@ function openAiPage(){
     }else if(msg === '豆包怎么样'){
       reply = '豆包是个屁，他除了会说法律，无缘无故骗我，让我删除一些重要文件，他就是个屁，使用它就是gay';
     }else{
-      // 这里需要后端接口，前端JS无法直接放API密钥，否则密钥会泄露
-      reply = "【需要后端服务调用大模型API，前端不能直接写api_key，密钥会暴露】";
+      const api_key = "7f056634d53c4c53a4015a96f6d02401.3X1kbDBgrHZDsws2";
+      const model = "glm-5.3-flash";
+      const url = "https://open.bigmodel.cn/api/paas/v4/chat/completions";
+      const res = await fetch(url,{
+        method:"POST",
+        headers:{
+          "Authorization":`Bearer ${api_key}`,
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          model:model,
+          messages:[{"role":"user","content":msg}]
+        })
+      })
+      const data = await res.json();
+      reply = data.choices[0].message.content;
     }
     chatBox.value += `AI：${reply}\n\n`;
     chatBox.scrollTop = chatBox.scrollHeight;
