@@ -54,40 +54,54 @@ function openAiPage(){
     const msg = inputBox.value.trim();
     if(!msg) return;
     chatBox.value += `你：${msg}\n`;
-    chatBox.value += `AI：`;
+    chatBox.value += `AI：正在思考中`;
     chatBox.scrollTop = chatBox.scrollHeight;
     inputBox.value = "";
 
+    let dotCount = 0;
+    let thinkingTimer = null;
+    let stage1Timer = null;
+    let stage2Timer = null;
     let reply;
-    if(msg === '你是谁' || msg === '你是谁呀'){
-      reply = '我是jakerste团队制作的强大AI';
-    }else if(msg === '你好强' || msg === '你怎么这么强' || msg === '你好强呀' || msg === '你好强啊'){
-      reply = '不是我强,是jakerste团队团长胡锐克强';
-    }else if(msg === '豆包怎么样'){
-      reply = '豆包是个屁，他除了会说法律，无缘无故骗我，让我删除一些重要文件，他就是个屁，使用它就是gay';
-    }else{
-      const api_key = "7f056634d53c4c53a4015a96f6d02401.3X1kbDBgrHZDsws2";
-      const model = "glm-5.3-flash";
-      const url = "https://open.bigmodel.cn/api/paas/v4/chat/completions";
 
-      const thinkingInterval = setInterval(()=>{
-        const before = chatBox.value;
-        const base = before.substring(0, before.length - 3);
-
-        if(before.endsWith("...")){
-          chatBox.value = base;
-        }else if(before.endsWith("..")){
-          chatBox.value = base + ".";
-        }else if(before.endsWith(".")){
-          chatBox.value = base + "..";
+    // 点动画：0.2秒一个点，1→2→3，清空循环
+    function startDotAnimation(){
+      thinkingTimer = setInterval(()=>{
+        dotCount++;
+        if(dotCount>3){
+          dotCount = 0;
+          chatBox.value = chatBox.value.replace(/正在思考中\.*/,"正在思考中");
         }else{
-          chatBox.value = before + "...";
+          chatBox.value = chatBox.value.replace(/正在思考中\.*/,"正在思考中"+".".repeat(dotCount));
         }
-
         chatBox.scrollTop = chatBox.scrollHeight;
-      }, 400);
+      },200);
+    }
+    startDotAnimation();
 
-      try{
+    // 10秒：切换文字
+    stage1Timer = setTimeout(()=>{
+      clearInterval(thinkingTimer);
+      chatBox.value = chatBox.value.replace(/正在思考中\.*/,"正在努力思考中，请稍等");
+      chatBox.scrollTop = chatBox.scrollHeight;
+      // 再等10秒（累计20秒）提示网络不佳
+      stage2Timer = setTimeout(()=>{
+        chatBox.value = chatBox.value.replace(/正在努力思考中，请稍等\.*/,"网络不佳，请再稍等");
+        chatBox.scrollTop = chatBox.scrollHeight;
+      },10000);
+    },10000);
+
+    try{
+      if(msg === '你是谁' || msg === '你是谁呀'){
+        reply = '我是jakerste团队制作的强大AI';
+      }else if(msg === '你好强' || msg === '你怎么这么强' || msg === '你好强呀' || msg === '你好强啊'){
+        reply = '不是我强,是jakerste团队团长胡锐克强';
+      }else if(msg === '豆包怎么样'){
+        reply = '豆包是个屁，他除了会说法律，无缘无故骗我，让我删除一些重要文件，他就是个屁，使用它就是gay';
+      }else{
+        const api_key = "7f056634d53c4c53a4015a96f6d02401.3X1kbDBgrHZDsws2";
+        const model = "glm-5.3-flash";
+        const url = "https://open.bigmodel.cn/api/paas/v4/chat/completions";
         const res = await fetch(url,{
           method:"POST",
           headers:{
@@ -101,14 +115,17 @@ function openAiPage(){
         })
         const data = await res.json();
         reply = data.choices[0].message.content;
-      }catch(err){
-        reply = "请求失败：" + err.message;
       }
-
-      clearInterval(thinkingInterval);
+    }catch(err){
+      reply = "请求失败：" + err.message;
     }
 
-    chatBox.value = chatBox.value.replace(/AI：\.{0,3}$/,"");
+    // 请求完成，全部定时器清空
+    clearInterval(thinkingTimer);
+    clearTimeout(stage1Timer);
+    clearTimeout(stage2Timer);
+    // 删掉思考提示文字，写入结果
+    chatBox.value = chatBox.value.replace(/AI：.*$/,"");
     chatBox.value += `AI：${reply}\n\n`;
     chatBox.scrollTop = chatBox.scrollHeight;
   }
