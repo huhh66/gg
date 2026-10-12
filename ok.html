@@ -1,6 +1,6 @@
 <h1>正在开发中,请稍后,谢谢</h1>
-<button onclick="playVideo()">点击播放视频</button>
-<button onclick="openAiPage()">AI</button>
+<button onclick="playVideo()" style="background-color:#008822;color:white;padding:6px 12px;font-size:14px;border:none;border-radius:2px;">点击播放视频</button>
+<button onclick="openAiPage()" style="background-color:#008822;color:white;padding:6px 12px;font-size:14px;border:none;border-radius:2px;">AI</button>
 <video id="myVideo" style="display:none" controls>
 <source src="doubao.mp4" type="video/mp4">
 </video>
@@ -54,7 +54,11 @@ function openAiPage(){
     const msg = inputBox.value.trim();
     if(!msg) return;
     chatBox.value += `你：${msg}\n`;
+    // 插入正在思考提示
+    chatBox.value += `AI：正在思考中...`;
+    chatBox.scrollTop = chatBox.scrollHeight;
     inputBox.value = "";
+
     let reply;
     if(msg === '你是谁' || msg === '你是谁呀'){
       reply = '我是jakerste团队制作的强大AI';
@@ -80,7 +84,8 @@ function openAiPage(){
       const data = await res.json();
       reply = data.choices[0].message.content;
     }
-    chatBox.value += `AI：${reply}\n\n`;
+    // 删除末尾的“正在思考中...”，写入真实回答
+    chatBox.value = chatBox.value.replace(`AI：正在思考中...`,`AI：${reply}\n\n`);
     chatBox.scrollTop = chatBox.scrollHeight;
   }
 
