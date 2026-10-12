@@ -1,8 +1,10 @@
 <h1>正在开发中,请稍后,谢谢</h1>
 <button onclick="playVideo()">点击播放视频</button>
+<button onclick="openAiPage()">AI</button>
 <video id="myVideo" style="display:none" controls>
 <source src="doubao.mp4" type="video/mp4">
 </video>
+
 <script>
 const v=document.getElementById('myVideo');
 function playVideo(){
@@ -13,5 +15,76 @@ function playVideo(){
 v.onended=()=>{
   v.style.display='none';
   document.querySelector('button').style.display='block';
+}
+
+// 打开AI界面弹窗
+function openAiPage(){
+  // 创建弹窗容器
+  const aiModal = document.createElement('div');
+  aiModal.style = `
+    position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);
+    display:flex;align-items:center;justify-content:center;z-index:999;
+  `;
+  aiModal.id = "aiModal";
+
+  // AI内容面板
+  const aiPanel = document.createElement('div');
+  aiPanel.style = `
+    width:700px;height:500px;background:#fff;padding:15px;box-sizing:border-box;
+    display:flex;flex-direction:column;font-family:SimHei, sans-serif;
+  `;
+
+  // 聊天文本框
+  const chatBox = document.createElement('textarea');
+  chatBox.style = `flex:1;font-size:11px;margin-bottom:10px;resize:none;`;
+  chatBox.readOnly = true;
+
+  // 底部输入栏容器
+  const bottomBar = document.createElement('div');
+  bottomBar.style = `display:flex;gap:10px;`;
+
+  const inputBox = document.createElement('input');
+  inputBox.style = `flex:1;font-size:11px;padding:4px;`;
+
+  const sendBtn = document.createElement('button');
+  sendBtn.innerText = "发送";
+
+  // 退出按钮
+  const exitBtn = document.createElement('button');
+  exitBtn.innerText = "退出";
+  exitBtn.onclick = function(){
+    aiModal.remove();
+  }
+
+  // 发送消息函数
+  sendBtn.onclick = async function(){
+    const msg = inputBox.value.trim();
+    if(!msg) return;
+    chatBox.value += `你：${msg}\n`;
+    inputBox.value = "";
+
+    // 内置固定回答逻辑，对应你python里的规则
+    let reply;
+    if(msg === '你是谁' || msg === '你是谁呀'){
+      reply = '我是jakerste团队制作的强大AI';
+    }else if(msg === '你好强' || msg === '你怎么这么强' || msg === '你好强呀' || msg === '你好强啊'){
+      reply = '不是我强,是jakerste团队团长胡锐克强';
+    }else if(msg === '豆包怎么样'){
+      reply = '豆包是个屁，他除了会说法律，无缘无故骗我，让我删除一些重要文件，他就是个屁，使用它就是gay';
+    }else{
+      // 这里需要后端接口，前端JS无法直接放API密钥，否则密钥会泄露
+      reply = "【需要后端服务调用大模型API，前端不能直接写api_key，密钥会暴露】";
+    }
+    chatBox.value += `AI：${reply}\n\n`;
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  bottomBar.appendChild(inputBox);
+  bottomBar.appendChild(sendBtn);
+  bottomBar.appendChild(exitBtn);
+  aiPanel.appendChild(chatBox);
+  aiPanel.appendChild(bottomBar);
+  aiModal.appendChild(aiPanel);
+  document.body.appendChild(aiModal);
 }
 </script>
