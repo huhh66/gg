@@ -1,3 +1,10 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>Hackjoy Demo</title>
+</head>
+<body>
 <h1>正在开发中,请稍后,谢谢</h1>
 <button onclick="playVideo()" style="background-color:#008822;color:white;padding:8px 16px;font-size:14px;border:none;border-radius:2px;width:140px;height:36px;box-sizing:border-box;">点击播放视频</button>
 <button onclick="openAiPage()" style="background-color:#008822;color:white;padding:8px 16px;font-size:14px;border:none;border-radius:2px;width:140px;height:36px;box-sizing:border-box;">AI</button>
@@ -32,14 +39,14 @@ function openAiPage(){
   `;
 
   const chatBox = document.createElement('textarea');
-  chatBox.style = `flex:1;font-size:11px;margin-bottom:10px;resize:none;`;
+  chatBox.style = `flex:1;font-size:14px;margin-bottom:10px;resize:none;`;
   chatBox.readOnly = true;
 
   const bottomBar = document.createElement('div');
   bottomBar.style = `display:flex;gap:10px;`;
 
   const inputBox = document.createElement('input');
-  inputBox.style = `flex:1;font-size:11px;padding:4px;`;
+  inputBox.style = `flex:1;font-size:14px;padding:4px;`;
 
   const sendBtn = document.createElement('button');
   sendBtn.innerText = "发送";
@@ -49,6 +56,16 @@ function openAiPage(){
   exitBtn.onclick = function(){
     aiModal.remove();
   }
+
+  bottomBar.appendChild(inputBox);
+  bottomBar.appendChild(sendBtn);
+  bottomBar.appendChild(exitBtn);
+
+  aiPanel.appendChild(chatBox);
+  aiPanel.appendChild(bottomBar);
+  aiModal.appendChild(aiPanel);
+  document.body.appendChild(aiModal);
+
 
   sendBtn.onclick = async function(){
     const msg = inputBox.value.trim();
@@ -60,11 +77,6 @@ function openAiPage(){
 
     let dotCount = 0;
     let thinkingTimer = null;
-    let stage1Timer = null;
-    let stage2Timer = null;
-    let reply;
-
-    // 点动画：0.2秒一个点，1→2→3，清空循环
     function startDotAnimation(){
       thinkingTimer = setInterval(()=>{
         dotCount++;
@@ -79,63 +91,54 @@ function openAiPage(){
     }
     startDotAnimation();
 
-    // 10秒：切换文字
-    stage1Timer = setTimeout(()=>{
-      clearInterval(thinkingTimer);
-      chatBox.value = chatBox.value.replace(/正在思考中\.*/,"正在努力思考中，请稍等");
-      chatBox.scrollTop = chatBox.scrollHeight;
-      // 再等10秒（累计20秒）提示网络不佳
-      stage2Timer = setTimeout(()=>{
-        chatBox.value = chatBox.value.replace(/正在努力思考中，请稍等\.*/,"网络不佳，请再稍等");
-        chatBox.scrollTop = chatBox.scrollHeight;
-      },10000);
-    },10000);
-
     try{
-      if(msg === '你是谁' || msg === '你是谁呀'){
-        reply = '我是jakerste团队制作的强大AI';
-      }else if(msg === '你好强' || msg === '你怎么这么强' || msg === '你好强呀' || msg === '你好强啊'){
-        reply = '不是我强,是jakerste团队团长胡锐克强';
-      }else if(msg === '豆包怎么样'){
-        reply = '豆包是个屁，他除了会说法律，无缘无故骗我，让我删除一些重要文件，他就是个屁，使用它就是gay';
-      }else{
         const api_key = "7f056634d53c4c53a4015a96f6d02401.3X1kbDBgrHZDsws2";
         const model = "glm-5.3-flash";
         const url = "https://open.bigmodel.cn/api/paas/v4/chat/completions";
-        const res = await fetch(url,{
-          method:"POST",
-          headers:{
-            "Authorization":`Bearer ${api_key}`,
-            "Content-Type":"application/json"
-          },
-          body:JSON.stringify({
-            model:model,
-            messages:[{"role":"user","content":msg}]
-          })
-        })
-        const data = await res.json();
-        reply = data.choices[0].message.content;
-      }
-    }catch(err){
-      reply = "请求失败：" + err.message;
-    }
 
-    // 请求完成，全部定时器清空
-    clearInterval(thinkingTimer);
-    clearTimeout(stage1Timer);
-    clearTimeout(stage2Timer);
-    // 删掉思考提示文字，写入结果
-    chatBox.value = chatBox.value.replace(/AI：.*$/,"");
-    chatBox.value += `AI：${reply}\n\n`;
-    chatBox.scrollTop = chatBox.scrollHeight;
+        const system_prompt = `
+你是Hackjoy。
+规则：
+识别用户输入，支持100+种人类语言。
+只要用户意图是【问候】，或者【询问你的名字 / 你是谁】，**无论任何语言**，强制只回复这一句话：我叫Hackjoy
+除此之外，正常回答用户的问题。
+⚠️ 如果命中上面规则，禁止增加额外文字，只能输出：我叫Hackjoy
+        `;
+
+        const resp = await fetch(url, {
+            method:"POST",
+            headers:{
+                "Authorization":`Bearer ${api_key}`,
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+                model:model,
+                messages:[
+                    {"role":"system","content":system_prompt},
+                    {"role":"user","content":msg}
+                ]
+            })
+        })
+        const data = await resp.json();
+        clearInterval(thinkingTimer);
+        const reply = data.choices[0].message.content;
+        chatBox.value = chatBox.value.replace(/正在思考中\.*/, reply+"\n");
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }catch(err){
+        clearInterval(thinkingTimer);
+        chatBox.value = chatBox.value.replace(/正在思考中\.*/, "网络请求出错，请稍后重试\n");
+        chatBox.scrollTop = chatBox.scrollHeight;
+        console.error(err);
+    }
   }
 
-  bottomBar.appendChild(inputBox);
-  bottomBar.appendChild(sendBtn);
-  bottomBar.appendChild(exitBtn);
-  aiPanel.appendChild(chatBox);
-  aiPanel.appendChild(bottomBar);
-  aiModal.appendChild(aiPanel);
-  document.body.appendChild(aiModal);
+  // 回车发送消息
+  inputBox.onkeydown = function(e){
+    if(e.key === 'Enter'){
+      sendBtn.click();
+    }
+  }
 }
 </script>
+</body>
+</html>
